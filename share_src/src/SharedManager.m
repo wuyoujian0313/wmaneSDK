@@ -190,12 +190,27 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 }
 
 - (void)registerSharedSDKs {
-    AISharedPlatformSDKInfo *sdk1 = [AISharedPlatformSDKInfo platform:AIPlatformWechat appId:WeiXinSDKAppId secret:WeiXinSDKAppSecret redirectURI:nil];
-    AISharedPlatformSDKInfo *sdk2 = [AISharedPlatformSDKInfo platform:AIPlatformQQ appId:QQSDKAppId secret:QQSDKAppKey redirectURI:nil];
-    AISharedPlatformSDKInfo *sdk3 = [AISharedPlatformSDKInfo platform:AIPlatformWeibo appId:WeiboAppKey secret:WeiboAppKey redirectURI:kWeiboRedirectURI];
     
-    [[SharedManager sharedManager] registerSharedPlatform:[NSArray arrayWithObjects:sdk1,sdk2,sdk3,nil]];
+    NSMutableArray *SDKs = [[NSMutableArray alloc] initWithCapacity:0];
+
+    if ([WXApi isWXAppInstalled] || 1) {
+        AISharedPlatformSDKInfo *sdk1 = [AISharedPlatformSDKInfo platform:AIPlatformWechat appId:WeiXinSDKAppId secret:WeiXinSDKAppSecret redirectURI:nil];
+        [SDKs addObject:sdk1];
+    }
     
+    if ([QQApiInterface isQQInstalled] || 1) {
+        AISharedPlatformSDKInfo *sdk2 = [AISharedPlatformSDKInfo platform:AIPlatformQQ appId:QQSDKAppId secret:QQSDKAppKey redirectURI:nil];
+        [SDKs addObject:sdk2];
+    }
+    
+    if (![WeiboSDK isWeiboAppInstalled] || 1) {
+        AISharedPlatformSDKInfo *sdk3 = [AISharedPlatformSDKInfo platform:AIPlatformWeibo appId:WeiboAppKey secret:WeiboAppKey redirectURI:kWeiboRedirectURI];
+        [SDKs addObject:sdk3];
+    }
+    
+    if ([SDKs count] > 0) {
+        [[SharedManager sharedManager] registerSharedPlatform:SDKs];
+    }
 }
 
 - (void)registerSharedPlatform:(NSArray<AISharedPlatformSDKInfo*> *)platforms {
@@ -213,8 +228,9 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         
             if (platform == AIPlatformWechat) {
                 // 微信
+                
                 if (![[PlatformConfigure sharedConfigure] isRegisterPlatform:platform]) {
-                    [WXApi registerApp:[item appId] withDescription:NSStringFromClass([sSelf class])];
+                    [WXApi registerApp:[item appId]];
                     [[PlatformConfigure sharedConfigure] addRegisterPlatform:platform];
                 }
 
@@ -325,6 +341,19 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
     [_scenes addObject:scene];
 }
 
+- (void)unstallAppMessage:(NSString *)message {
+    UIAlertAction *aAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        //
+    }];
+    //
+    
+    UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    [alertController addAction:aAction];
+    
+    UIApplication *application = [UIApplication sharedApplication];
+    [application.keyWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
+}
+
 - (void)sharedData:(SharedDataModel*)dataModel finish:(AISharedFinishBlock)finishBlock {
     
     self.finishBlock = finishBlock;
@@ -346,6 +375,8 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         if (_finishBlock) {
             _finishBlock(AIInvokingStatusCodeUnintallApp,nil);
         }
+        
+        [self unstallAppMessage:@"手机未安装微信客户端！"];
         return;
     }
     
@@ -427,6 +458,7 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         if (_finishBlock) {
             _finishBlock(AIInvokingStatusCodeUnintallApp,nil);
         }
+        [self unstallAppMessage:@"手机未安装QQ客户端！"];
         return;
     }
     
@@ -444,8 +476,10 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
             
         } else if (scene.scene == AISharedPlatformSceneTimeline) {
             // 分享到空间
-            QQApiImageArrayForQZoneObject *obj = [QQApiImageArrayForQZoneObject objectWithimageDataArray:nil title:text];
-            SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:obj];
+            
+            QQApiTextObject* txtObj = [QQApiTextObject objectWithText:text];
+            
+            SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:txtObj];
             QQApiSendResultCode sentCode = [QQApiInterface SendReqToQZone:req];
             [self handleSendQQResult:sentCode];
             
@@ -503,6 +537,7 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         if (_finishBlock) {
             _finishBlock(AIInvokingStatusCodeUnintallApp,nil);
         }
+        [self unstallAppMessage:@"手机未安装微博客户端！"];
         return;
     }
     
@@ -623,7 +658,8 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 
 @end
 
-/*
+#if 1
+
 #pragma mark - UIApplicationDelegate的钩子函数，不用修改！！！
 @interface AIAppHook2Shared : NSObject
 @end
@@ -660,7 +696,7 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 
 - (BOOL)hookedApplication:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)dic {
     [self hookedApplication:application didFinishLaunchingWithOptions:dic];
-    [[SharedManager sharedManager] registerSharedSDK];
+    [[SharedManager sharedManager] registerSharedSDKs];
     return YES;
 }
 
@@ -695,8 +731,8 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 -(BOOL)defaultApplication:(UIApplication*)application openURL:(NSURL *)url options:(NSDictionary<NSString*, id> *)options {
     return YES;
 }
-    
- 
+
 @end
- */
+
+#endif
 

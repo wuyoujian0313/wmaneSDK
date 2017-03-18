@@ -9,7 +9,7 @@
 #import <Foundation/Foundation.h>
 
 // AppDelegate的名称，即，main的第三个参数值
-#define AppDelegateClassName        @"CTAppDelegate"
+#define AppDelegateClassName        @"AppDelegate"
 
 
 // 目前我们这个开发库只对接：微信、QQ、微博

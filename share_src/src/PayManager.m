@@ -77,10 +77,18 @@
 }
 
 - (void)registerPaySDKs {
-    AIPayPlatformSDKInfo *sdk1 = [AIPayPlatformSDKInfo platform:AIPlatformWechat appId:WeiXinSDKAppId secret:WeiXinSDKAppSecret];
+    NSMutableArray *SDKs = [[NSMutableArray alloc] initWithCapacity:0];
+    if ([WXApi isWXAppInstalled]) {
+
+        AIPayPlatformSDKInfo *sdk1 = [AIPayPlatformSDKInfo platform:AIPlatformWechat appId:WeiXinSDKAppId secret:WeiXinSDKAppSecret];
+        [SDKs addObject:sdk1];
+    }
     
     //
-    [[PayManager sharedManager] registerPayPlatform:[NSArray arrayWithObjects:sdk1,nil]];
+    if ([SDKs count] > 0) {
+        [[PayManager sharedManager] registerPayPlatform:SDKs];
+    }
+    
 }
 
 - (BOOL)isInstallPayApp {
@@ -111,7 +119,7 @@
             if (platform == AIPlatformWechat) {
                 // 微信
                 if (![[PlatformConfigure sharedConfigure] isRegisterPlatform:platform]) {
-                    [WXApi registerApp:[item appId] withDescription:NSStringFromClass([sSelf class])];
+                    [WXApi registerApp:[item appId]];
                     [[PlatformConfigure sharedConfigure] addRegisterPlatform:platform];
                 }
                 
@@ -131,6 +139,23 @@
 
 
 - (void)payMoney:(NSUInteger)money finish:(AIPayFinishBlock)finishBlock {
+    
+    if (![self isInstallPayApp]) {
+        
+        UIAlertAction *aAction = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            //
+        }];
+        //
+        
+        UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"提示" message:@"您的手机未安装微信或支付宝！" preferredStyle:UIAlertControllerStyleAlert];
+        [alertController addAction:aAction];
+        
+        UIApplication *application = [UIApplication sharedApplication];
+        [application.keyWindow.rootViewController presentViewController:alertController animated:YES completion:nil];
+        
+        return;
+    }
+    
     self.finishBlock = finishBlock;
     self.money = money;
     if (_actionSheet) {
