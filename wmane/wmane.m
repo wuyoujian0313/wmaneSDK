@@ -94,6 +94,8 @@ void ContextInitializer(void* extData, const uint8_t* ctxType, FREContext ctx, u
         MAP_FUNCTION(sharing_function_image,NULL),
         MAP_FUNCTION(sharing_function_image_url,NULL),
         MAP_FUNCTION(sharing_function_is_installed,NULL),
+        MAP_FUNCTION(login_function_qq,NULL),
+        MAP_FUNCTION(login_function_wx,NULL),
         MAP_FUNCTION(payMoney,NULL),
 
     };
@@ -167,6 +169,14 @@ ANE_FUNCTION(sharing_function_image_url) {
 
 ANE_FUNCTION(sharing_function_is_installed) {
     return [globalANEExFuc isAppInstalled];
+}
+
+ANE_FUNCTION(login_function_qq) {
+    return [globalANEExFuc loginByQQ];
+}
+
+ANE_FUNCTION(login_function_wx) {
+    return [globalANEExFuc loginByWX];
 }
 
 ANE_FUNCTION(payMoney) {

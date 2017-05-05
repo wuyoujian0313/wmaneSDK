@@ -8,9 +8,6 @@
 
 #import <Foundation/Foundation.h>
 
-#define WeiXinSDKAppSecret          @"dce5699086e990df3104052ce298f573"
-#define WeiXinSDKAppId              @"wx7a296d05150143e5"
-
 typedef void(^AIPayFinishBlock)(NSInteger statusCode,id resp);
 
 @interface PayManager : NSObject

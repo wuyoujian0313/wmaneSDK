@@ -21,6 +21,8 @@ typedef void(^AISharedFinishBlock)(NSInteger statusCode,id resp);
 - (void)registerSharedSDKs;
 - (BOOL)isInstallSharedApp;
 
+- (void)loginByWX:(AISharedFinishBlock)finishBlock;
+- (void)loginByQQ:(AISharedFinishBlock)finishBlock;
 // 分享
 - (void)sharedData:(SharedDataModel*)dataModel finish:(AISharedFinishBlock)finishBlock;
 @end

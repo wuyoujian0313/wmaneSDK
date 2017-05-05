@@ -31,6 +31,9 @@
 // 判断手机有没有安装：微信、QQ、新浪微博
 - (FREObject)isAppInstalled;
 
+- (FREObject)loginByWX;
+- (FREObject)loginByQQ;
+
 
 - (FREObject)payMoney:(FREObject)money;
 

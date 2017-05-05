@@ -53,18 +53,87 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 }
 
 - (void)onResp:(BaseResp*)resp {
-    if (_finishBlock) {
-        _finishBlock(AIInvokingStatusCodeDone,resp);
+    
+    if ([resp isKindOfClass:[SendAuthResp class]]) {
+
+        SendAuthResp *aresp = (SendAuthResp *)resp;
+        if ([aresp.state isEqualToString:@"weimeitc_aneProject"]) {
+            NSString *code = aresp.code;
+            [self getAccessTokenWithCode:code];
+        }
     }
+    
+}
+
+- (void)getAccessTokenWithCode:(NSString *)code {
+    
+    NSString *urlString =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/oauth2/access_token?appid=%@&secret=%@&code=%@&grant_type=authorization_code",WeiXinSDKAppId,WeiXinSDKAppSecret,code];
+    NSURL *url = [NSURL URLWithString:urlString];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSString *dataStr = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
+        NSData *data = [dataStr dataUsingEncoding:NSUTF8StringEncoding];
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            if (data){
+                NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+                if ([dict objectForKey:@"errcode"]) {
+                    NSLog(@"%@",dict);
+                } else {
+                    /*
+                     {
+                     "access_token" = "tnSXfzh2w8zrDe8zCdi0m1ZmOR***************Ckz6S6xJLQFeUDgu5Hyhwyowg5fvOhW2ZpA7Rr_PGPPO8P1Sw";
+                     "expires_in" = 7200;
+                     openid = oKiGKvxz***************JEjaYTNZPmA6OU;
+                     "refresh_token" = "piHYgVqYxjw8mGdS1Wrnq8bIihijEp_Tvz6K***************jveI4iv5MPvOyV9zIemT_YAzv5S9djY";
+                     scope = "snsapi_userinfo";
+                     unionid = "o6awM***************aYlc***************ft9-A";
+                     }
+                     */
+                    [self getUserInfoWithAccessToken:[dict objectForKey:@"access_token"] andOpenId:[dict objectForKey:@"openid"]];
+                }
+            }
+        });
+    });
+}
+
+
+//使用AccessToken获取用户信息
+- (void)getUserInfoWithAccessToken:(NSString *)accessToken andOpenId:(NSString *)openId {
+    NSString *urlString =[NSString stringWithFormat:@"https://api.weixin.qq.com/sns/userinfo?access_token=%@&openid=%@",accessToken,openId];
+    NSURL *url = [NSURL URLWithString:urlString];
+    
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        NSString *dataStr = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:nil];
+        NSData *data = [dataStr dataUsingEncoding:NSUTF8StringEncoding];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            
+            if (data) {
+                NSDictionary *dict = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+                
+                if ([dict objectForKey:@"errcode"]) {
+                    //AccessToken失效
+                }else {
+                    NSLog(@"dictdict%@",dict);
+                    if (_finishBlock) {
+                        _finishBlock(AIInvokingStatusCodeAuthDone,dict);
+                    }
+                }
+            }
+        });
+    });
 }
 
 @end
 
-@interface AIQQSDKCallback : NSObject<QQApiInterfaceDelegate>
+@interface AIQQSDKCallback : NSObject<QQApiInterfaceDelegate,TencentSessionDelegate>
 @end
 
 @interface AIQQSDKCallback ()
 @property (nonatomic, copy) AISharedFinishBlock        finishBlock;
+@property (nonatomic, strong) TencentOAuth  *qqAuth;
 @end
 
 @implementation AIQQSDKCallback
@@ -81,6 +150,35 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 
 - (void)onReq:(QQBaseReq *)req {}
 - (void)isOnlineResponse:(NSDictionary *)response {}
+
+
+/**
+ * 登录成功后的回调
+ */
+- (void)tencentDidLogin {
+    
+    if (_finishBlock) {
+        _finishBlock(AIInvokingStatusCodeAuthDone,[_qqAuth openId]);
+    }
+    
+}
+
+/**
+ * 登录失败后的回调
+ * \param cancelled 代表用户是否主动退出登录
+ */
+- (void)tencentDidNotLogin:(BOOL)cancelled {
+    
+}
+
+/**
+ * 登录时网络有问题的回调
+ */
+- (void)tencentDidNotNetWork {
+    
+}
+
+
 @end
 
 
@@ -154,7 +252,7 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
 }
 
 + (instancetype)allocWithZone:(struct _NSZone *)zone {
-    return [self sharedManager];
+    return [[self class] sharedManager];
 }
 
 - (instancetype)copy {
@@ -177,9 +275,11 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         if ([[url absoluteString] hasPrefix:[sdk appId]]) {
             //微信回调
             return [WXApi handleOpenURL:url delegate:[SharedManager sharedManager].wxCallback];
-        } else if ([[url absoluteString] hasPrefix:[sdk appId]]) {
+        } else if ([[url absoluteString] hasPrefix:[NSString stringWithFormat:@"QQ%@",[sdk appId]]] || [[url absoluteString] hasPrefix:[NSString stringWithFormat:@"tencent%@",[sdk appId]]]) {
             //QQ回调
-            return [QQApiInterface handleOpenURL:url delegate:[SharedManager sharedManager].qqCallback];
+            [QQApiInterface handleOpenURL:url delegate:[SharedManager sharedManager].qqCallback];
+            [TencentOAuth HandleOpenURL:url];
+            return YES;
         } else if ([[url absoluteString] hasPrefix:[NSString stringWithFormat:@"wb%@",[sdk appId]]]) {
             //新浪微博回调
             return [WeiboSDK handleOpenURL:url delegate:[SharedManager sharedManager]];
@@ -268,8 +368,6 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         self.actionSheet = [[ AIActionSheet alloc] initInParentView:[UIApplication sharedApplication].keyWindow.rootViewController.view delegate:self];
         self.scenes = [[NSMutableArray alloc] initWithCapacity:0];
     }
-    
-   //
     
     for (inline_SharedPlatformScene*item in _scenes) {
         if (item == scene) {
@@ -368,6 +466,7 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
     return [WXApi isWXAppInstalled] || [QQApiInterface isQQInstalled] || [WeiboSDK isWeiboAppInstalled];
 }
 
+
 - (void)shareToWeixin:(inline_SharedPlatformScene *)scene {
     
     self.wxCallback.finishBlock = _finishBlock;
@@ -449,6 +548,35 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
     }
     
     [WXApi sendReq:req];
+}
+
+- (void)loginByWX:(AISharedFinishBlock)finishBlock {
+    
+    self.finishBlock = finishBlock;
+    self.wxCallback.finishBlock = _finishBlock;
+    
+    SendAuthReq* req =[[SendAuthReq alloc ] init];
+    req.scope = @"snsapi_userinfo";
+    req.state = @"weimeitc_aneProject";
+    //第三方向微信终端发送一个SendAuthReq消息结构
+    [WXApi sendReq:req];
+}
+
+- (void)loginByQQ:(AISharedFinishBlock)finishBlock {
+    
+    self.finishBlock = finishBlock;
+    self.qqCallback.finishBlock = _finishBlock;
+    
+   
+    
+    NSArray* permissions = [NSArray arrayWithObjects:
+                            kOPEN_PERMISSION_GET_SIMPLE_USER_INFO,
+                            nil];
+    TencentOAuth *tencentOAuth = [[TencentOAuth alloc] initWithAppId:QQSDKAppId andDelegate:self.qqCallback];
+    self.qqCallback.qqAuth = tencentOAuth;
+    [tencentOAuth authorize:permissions inSafari:NO];
+
+    
 }
 
 - (void)shareToQQ:(inline_SharedPlatformScene *)scene {

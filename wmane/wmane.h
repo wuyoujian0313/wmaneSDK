@@ -83,6 +83,8 @@ ANE_FUNCTION(sharing_function_link);
 ANE_FUNCTION(sharing_function_image);
 ANE_FUNCTION(sharing_function_image_url);
 ANE_FUNCTION(sharing_function_is_installed);
+ANE_FUNCTION(login_function_qq);
+ANE_FUNCTION(login_function_wx);
 
 ANE_FUNCTION(payMoney);
 

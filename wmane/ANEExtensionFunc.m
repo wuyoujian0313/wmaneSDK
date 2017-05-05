@@ -82,7 +82,7 @@
         
         [[SharedManager sharedManager] sharedData:model finish:^(NSInteger statusCode, id resp) {
             //
-            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",statusCode];
+            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",(long)statusCode];
             DISPATCH_STATUS_EVENT(self.context, [@"shareCallback" UTF8String], [strstatusCode UTF8String]);
         }];
 
@@ -106,7 +106,7 @@
         
         [[SharedManager sharedManager] sharedData:model finish:^(NSInteger statusCode, id resp) {
             //
-            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",statusCode];
+            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",(long)statusCode];
             DISPATCH_STATUS_EVENT(self.context, [@"shareCallback" UTF8String], [strstatusCode UTF8String]);
         }];
         
@@ -134,11 +134,50 @@
         
         [[SharedManager sharedManager] sharedData:model finish:^(NSInteger statusCode, id resp) {
             //
-            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",statusCode];
+            NSString *strstatusCode = [NSString stringWithFormat:@"%ld",(long)statusCode];
             DISPATCH_STATUS_EVENT(self.context, [@"shareCallback" UTF8String], [strstatusCode UTF8String]);
         }];
     }
     
+    return NULL;
+}
+
+- (FREObject)loginByWX {
+    [[SharedManager sharedManager] loginByWX:^(NSInteger statusCode, id resp) {
+        //
+        if ([resp isKindOfClass:[NSDictionary class]]) {
+            NSDictionary *data = resp;
+            NSString *nickname = [data objectForKey:@"nickname"];
+            NSString *unionid = [data objectForKey:@"unionid"];
+            
+            NSString *message = [nickname stringByAppendingFormat:@"###%@",unionid];
+            
+            DISPATCH_STATUS_EVENT(self.context,[@"login_function_wx" UTF8String],[message UTF8String]);
+            
+        }
+
+    }];
+    return NULL;
+}
+
+- (FREObject)loginByQQ {
+//    id delegate = [UIApplication sharedApplication].delegate;
+//    NSString *appName = NSStringFromClass([delegate class]);
+//    
+//    DISPATCH_STATUS_EVENT(self.context,[@"login_function_qq" UTF8String],[appName UTF8String]);
+    
+    [[SharedManager sharedManager] loginByQQ:^(NSInteger statusCode, id resp) {
+        //
+        if ([resp isKindOfClass:[NSString class]]) {
+            NSString *openId = resp;
+            
+            NSString *message = [openId stringByAppendingFormat:@"###%@",openId];
+            
+            DISPATCH_STATUS_EVENT(self.context,[@"login_function_qq" UTF8String],[message UTF8String]);
+            
+        }
+        
+    }];
     return NULL;
 }
 
@@ -154,7 +193,7 @@
     [_converter FREObject2NSUInteger:money toNSUInteger:&uMoney];
     [[PayManager sharedManager] payMoney:uMoney finish:^(NSInteger statusCode, id resp) {
         //
-        NSString *strstatusCode = [NSString stringWithFormat:@"%ld",statusCode];
+        NSString *strstatusCode = [NSString stringWithFormat:@"%ld",(long)statusCode];
         DISPATCH_STATUS_EVENT(self.context, [@"payCallback" UTF8String], [strstatusCode UTF8String]);
     }];
     
