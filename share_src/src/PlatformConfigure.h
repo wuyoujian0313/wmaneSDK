@@ -16,25 +16,23 @@
 
 
 // 目前我们这个开发库只对接：微信、QQ、微博
-
-// 微信 - 北汽电工
-#define QQSDKAppKey                 @"x8uJ8UZ96u5AddjP"
-#define QQSDKAppId                  @"1106041578"
-
-// 微信 - 北汽电机
-//#define QQSDKAppKey                 @"Hw4msb01bjk4X17l"
-//#define QQSDKAppId                  @"1106056265"
-
-
-// 北汽电机
-//#define WeiXinSDKAppSecret          @"fedba484c5f88fc3398eee6bda007dce"
-//#define WeiXinSDKAppId              @"wxf74876d011fb1356"
-//#define WeiXinBusinessNo            @"1326100701"
-
-// 微信 - 北汽电工
+// 北汽高级维修
+#if 1
+#define QQSDKAppKey                 @"7kuxHSwsLybdLQ5O"
+#define QQSDKAppId                  @"1106131684"
 #define WeiXinSDKAppSecret          @"d2f36fee5809ea6d1909ff56e29f1e83"
 #define WeiXinSDKAppId              @"wx828ddb181a65570c"
 #define WeiXinBusinessNo            @"1326100701"
+
+#else
+// 北汽电机知识
+#define QQSDKAppKey                 @"OR7B2A2kRZC6riPH"
+#define QQSDKAppId                  @"1106060269"
+#define WeiXinSDKAppSecret          @"fedba484c5f88fc3398eee6bda007dce"
+#define WeiXinSDKAppId              @"wxf74876d011fb1356"
+#define WeiXinBusinessNo            @"1326100701"
+#endif
+
 
 #define WeiboAppKey                 @"2045436852"
 #define kWeiboRedirectURI           @"http://www.sina.com"

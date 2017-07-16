@@ -303,10 +303,10 @@ typedef NS_ENUM(NSInteger, AISharedPlatformScene) {
         [SDKs addObject:sdk2];
     }
     
-    if (![WeiboSDK isWeiboAppInstalled] || 1) {
-        AISharedPlatformSDKInfo *sdk3 = [AISharedPlatformSDKInfo platform:AIPlatformWeibo appId:WeiboAppKey secret:WeiboAppKey redirectURI:kWeiboRedirectURI];
-        [SDKs addObject:sdk3];
-    }
+//    if (![WeiboSDK isWeiboAppInstalled] || 1) {
+//        AISharedPlatformSDKInfo *sdk3 = [AISharedPlatformSDKInfo platform:AIPlatformWeibo appId:WeiboAppKey secret:WeiboAppKey redirectURI:kWeiboRedirectURI];
+//        [SDKs addObject:sdk3];
+//    }
     
     if ([SDKs count] > 0) {
         [[SharedManager sharedManager] registerSharedPlatform:SDKs];
