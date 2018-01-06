@@ -37,4 +37,7 @@
 
 - (FREObject)payMoney:(FREObject)money;
 
+- (FREObject)playAV:(FREObject)text;
+- (FREObject)playAVForLocal:(FREObject)text;
+
 @end

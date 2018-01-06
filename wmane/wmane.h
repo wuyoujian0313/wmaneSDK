@@ -88,6 +88,9 @@ ANE_FUNCTION(login_function_wx);
 
 ANE_FUNCTION(payMoney);
 
+ANE_FUNCTION(playAV);
+ANE_FUNCTION(playAVForLocal);
+
 
 
 

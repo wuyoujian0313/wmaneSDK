@@ -97,6 +97,8 @@ void ContextInitializer(void* extData, const uint8_t* ctxType, FREContext ctx, u
         MAP_FUNCTION(login_function_qq,NULL),
         MAP_FUNCTION(login_function_wx,NULL),
         MAP_FUNCTION(payMoney,NULL),
+        MAP_FUNCTION(playAV, NULL),
+        MAP_FUNCTION(playAVForLocal, NULL),
 
     };
     
@@ -183,5 +185,13 @@ ANE_FUNCTION(payMoney) {
    return [globalANEExFuc payMoney:argv[0]];
 }
 
+
+ANE_FUNCTION(playAV) {
+    return [globalANEExFuc playAV:argv[0]];
+}
+
+ANE_FUNCTION(playAVForLocal) {
+    return [globalANEExFuc playAVForLocal:argv[0]];
+}
 
 

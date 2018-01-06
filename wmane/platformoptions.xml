@@ -37,6 +37,8 @@ either expressed or implied, of the FreeBSD Project.
         <option>-framework TencentOpenAPI</option>
         <option>-framework CoreTelephony</option>
         <option>-framework ImageIO</option>
+        <option>-framework MediaPlayer</option>
+        <option>-framework AVKit</option>
         <option>-lsqlite3</option>
         <option>-ObjC</option>
         <option>-ios_version_min 7.0</option>

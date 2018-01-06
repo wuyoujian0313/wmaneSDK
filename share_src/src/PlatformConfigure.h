@@ -16,13 +16,23 @@
 
 
 // 目前我们这个开发库只对接：微信、QQ、微博
+
+#if 0
+
 // 北汽高级维修
-#if 1
-#define QQSDKAppKey                 @"7kuxHSwsLybdLQ5O"
-#define QQSDKAppId                  @"1106131684"
+//#define QQSDKAppKey                 @"7kuxHSwsLybdLQ5O"
+//#define QQSDKAppId                  @"1106131684"
+//#define WeiXinSDKAppSecret          @"d2f36fee5809ea6d1909ff56e29f1e83"
+//#define WeiXinSDKAppId              @"wx828ddb181a65570c"
+//#define WeiXinBusinessNo            @"1326100701"
+
+// 北汽维护
+#define QQSDKAppKey                 @"NT66deIQ4RNl5gDA"
+#define QQSDKAppId                  @"1106347438"
 #define WeiXinSDKAppSecret          @"d2f36fee5809ea6d1909ff56e29f1e83"
-#define WeiXinSDKAppId              @"wx828ddb181a65570c"
+#define WeiXinSDKAppId              @"wx78bf5210b6ebf466"
 #define WeiXinBusinessNo            @"1326100701"
+
 
 #else
 // 北汽电机知识
