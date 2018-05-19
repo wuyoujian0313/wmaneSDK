@@ -51,9 +51,9 @@
 #define IS_RETINA ([UIScreen mainScreen].scale >= 2.0)
 
 typedef NS_ENUM(NSInteger, AIPlatform) {
-    AIPlatformWechat = 100,
-    AIPlatformQQ,
-    AIPlatformWeibo,
+    AIPlatformWechat = 0,
+    AIPlatformQQ = 1,
+    AIPlatformWeibo = 2,
 };
 
 typedef NS_ENUM(NSInteger, AIInvokingStatusCode) {
